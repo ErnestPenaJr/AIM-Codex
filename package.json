@@ -4,7 +4,9 @@
   "description": "BSA mock data dashboard with Prisma + Express + Bootstrap.",
   "main": "server.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:ui\"",
+    "dev:api": "PORT=3001 node server.js",
+    "dev:ui": "http-server public -p 5175 -c-1",
     "start": "node server.js",
     "db:push": "prisma db push",
     "db:seed": "node scripts/import.js",
@@ -12,10 +14,13 @@
   },
   "dependencies": {
     "@prisma/client": "^5.15.0",
+    "cors": "^2.8.5",
     "csv-parse": "^5.5.0",
     "express": "^4.19.2"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
+    "http-server": "^14.1.1",
     "prisma": "^5.15.0"
   }
 }

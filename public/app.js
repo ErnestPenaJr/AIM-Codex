@@ -417,6 +417,39 @@ function setupDetailTooltips(container) {
   });
 }
 
+function wireModalActionButtons() {
+  const popup = document.querySelector(".enterprise-modal");
+  if (!popup) return;
+  const buttons = popup.querySelectorAll(".enterprise-modal__action-btn");
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const action = btn.dataset.action;
+      const label = action === "create-request" ? "Create Request" : "Create Notification";
+      showComingSoonToast(`${label} — coming soon`);
+    });
+  });
+}
+
+function showComingSoonToast(message) {
+  let toast = document.querySelector(".coming-soon-toast");
+  if (toast) {
+    toast.remove();
+  }
+  toast = document.createElement("div");
+  toast.className = "coming-soon-toast";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("coming-soon-toast--visible"));
+  window.setTimeout(() => {
+    toast.classList.remove("coming-soon-toast--visible");
+    window.setTimeout(() => toast.remove(), 250);
+  }, 2200);
+}
+
 async function showSubjectDetails(subjectName) {
   await ensureDataLoaded();
   const data = buildSubjectDetailsFromRecords(allRecords, { ...filters, subjectName });
@@ -487,8 +520,16 @@ async function showSubjectDetails(subjectName) {
     title: safeSubjectName,
     width: "70rem",
     html: `
+      <div class="enterprise-modal__actions">
+        <button type="button" class="enterprise-modal__action-btn enterprise-modal__action-btn--request" data-action="create-request">Create Request</button>
+        <button type="button" class="enterprise-modal__action-btn enterprise-modal__action-btn--notification" data-action="create-notification">Create Notification</button>
+      </div>
       <div class="text-start">
         <div class="detail-grid">
+          <div class="detail-card detail-card--api">
+            <div class="detail-label">PACER/WebCrims Status Updates (API)</div>
+            <div class="detail-value">Active</div>
+          </div>
           <div class="detail-card">
             <div class="detail-label">Transactions</div>
             <div class="detail-value">${formatNumber(data.transactionCount)}</div>
@@ -680,6 +721,7 @@ async function showSubjectDetails(subjectName) {
     showConfirmButton: true,
     didOpen: () => {
       setupDetailTooltips(document.querySelector(".enterprise-modal"));
+      wireModalActionButtons({ subjectName: data.subjectName });
       const table = document.querySelector(".enterprise-modal .detail-table table");
       if (!table) return;
       const headers = table.querySelectorAll("thead th.sortable");
@@ -767,8 +809,16 @@ async function showLinkIdDetails(subjectName, linkId) {
     title: `Link ID ${safeLinkId}`,
     width: "70rem",
     html: `
+      <div class="enterprise-modal__actions">
+        <button type="button" class="enterprise-modal__action-btn enterprise-modal__action-btn--request" data-action="create-request">Create Request</button>
+        <button type="button" class="enterprise-modal__action-btn enterprise-modal__action-btn--notification" data-action="create-notification">Create Notification</button>
+      </div>
       <div class="text-start">
         <div class="detail-grid">
+          <div class="detail-card detail-card--api">
+            <div class="detail-label">PACER/WebCrims Status Updates (API)</div>
+            <div class="detail-value">Active</div>
+          </div>
           <div class="detail-card">
             <div class="detail-label">Entities</div>
             <div class="detail-value">${safeEntityCount}</div>
@@ -818,6 +868,7 @@ async function showLinkIdDetails(subjectName, linkId) {
     `,
     showConfirmButton: true,
     didOpen: () => {
+      wireModalActionButtons({ linkId: data.linkId });
       const table = document.querySelector(".enterprise-modal .detail-table table");
       if (!table) return;
       const headers = table.querySelectorAll("thead th.sortable");

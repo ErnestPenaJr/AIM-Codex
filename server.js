@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const cors = require("cors");
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -46,7 +47,16 @@ const buildLinkId = (subjectState, zip3, subjectName) => {
 
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+
+app.use(
+  cors({
+    origin: ["http://localhost:5175"],
+  }),
+);
+
+if (process.env.SERVE_STATIC === "true") {
+  app.use(express.static(path.join(__dirname, "public")));
+}
 
 app.get("/api/summary", async (req, res) => {
   const where = buildWhere(req.query);
